@@ -21,51 +21,51 @@
         }
     </style>
 </head>
-<body class="bg-white min-h-screen flex items-center justify-center p-4">
+<body class="bg-white min-h-screen flex justify-center">
 
     <div class="w-full max-w-md">
         <section>
-	<div class="bg-white rounded-2xl p-5 flex-grow flex flex-col justify-between relative overflow-hidden transition-all-300 shadow-sm hover:shadow-md">
+            <div class="bg-transparent py-1 px-5 flex-grow flex flex-col justify-between relative overflow-hidden transition-all-300">
                 
                 <div class="relative z-10">
-                    <p class="text-base font-bold text-[#005D99] flex items-center gap-1.5 mb-1">
+                    <p class="text-lg font-bold text-[#005D99] flex items-center gap-1.5 mb-3">
                         <i class="fa-solid fa-hourglass-half animate-spin-slow"></i>
                         TIME LEFT UNTIL CO₂ BUDGET DEPLETED
                     </p>
-                    <p class="text-[10px] text-slate-500 mb-3">Countdown to 2.0°C climate threshold</p>
+                    <p class="text-xs text-slate-500 mb-3">Countdown to 2.0°C climate threshold</p>
                     
                     <div class="grid grid-cols-6 gap-1 bg-slate-50 border border-slate-200 p-3 rounded-xl font-mono text-center mb-4">
                         <div>
-                            <span id="cd-yr" class="text-lg md:text-xl font-bold text-[#005D99]">00</span>
+                            <span id="cd-yr" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
                             <span class="block text-[8px] text-slate-500 uppercase font-semibold">yr</span>
                         </div>
                         <div>
-                            <span id="cd-mo" class="text-lg md:text-xl font-bold text-[#005D99]">00</span>
+                            <span id="cd-mo" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
                             <span class="block text-[8px] text-slate-500 uppercase font-semibold">mo</span>
                         </div>
                         <div>
-                            <span id="cd-dy" class="text-lg md:text-xl font-bold text-[#005D99]">00</span>
+                            <span id="cd-dy" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
                             <span class="block text-[8px] text-slate-500 uppercase font-semibold">dy</span>
                         </div>
                         <div>
-                            <span id="cd-hr" class="text-lg md:text-xl font-bold text-[#005D99]">00</span>
+                            <span id="cd-hr" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
                             <span class="block text-[8px] text-slate-500 uppercase font-semibold">hr</span>
                         </div>
                         <div>
-                            <span id="cd-mn" class="text-lg md:text-xl font-bold text-[#005D99]">00</span>
+                            <span id="cd-mn" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
                             <span class="block text-[8px] text-slate-500 uppercase font-semibold">min</span>
                         </div>
                         <div>
-                            <span id="cd-sc" class="text-lg md:text-xl font-bold text-[#005D99]">00</span>
+                            <span id="cd-sc" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
                             <span class="block text-[8px] text-slate-500 uppercase font-semibold">sec</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="relative z-10 border-t border-slate-200 pt-4">
-                    <p class="text-base text-slate-500 mb-1 uppercase font-bold tracking-wider">Remaining CO₂ Budget</p>
-                    <p class="text-[10px] text-slate-400 mb-2">CO₂ budget left (tonnes)</p>
-                    <p id="co2-budget" class="text-2xl font-black text-[#005D99] font-mono tracking-wider">
+                    <p class="text-xs text-slate-500 mb-1 uppercase font-bold tracking-wider">Remaining CO₂ Budget</p>
+                    <p class="text-[11px] text-slate-400 mb-2">CO₂ budget left (tonnes)</p>
+                    <p id="co2-budget" class="text-3xl font-black text-[#005D99] font-mono tracking-wider">
                         000,000,000,000
                     </p>
                 </div>
@@ -75,8 +75,6 @@
 
     <script>
         // --- 2.0°C 기후 저지선 데이터 세팅 ---
-        // 2020년 1월 1일 기준 2°C 목표 달성을 위한 잔여 예산: 1,150,000,000,000 톤 (1,150 Gt)
-        // 전 세계 연간 배출량: 약 42.2 Gt (초당 약 1,331.8 톤 소모)
         const BASE_BUDGET_2020 = 1150000000000; 
         const BASE_TIME_2020 = new Date("2020-01-01T00:00:00Z").getTime();
         const EMISSION_PER_SECOND = 1331.8159; 
@@ -85,11 +83,9 @@
             const now = Date.now();
             const elapsedSeconds = (now - BASE_TIME_2020) / 1000;
 
-            // 1. 현재 남은 탄소 예산 계산
             const currentBudget = BASE_BUDGET_2020 - (elapsedSeconds * EMISSION_PER_SECOND);
             document.getElementById('co2-budget').innerText = Math.max(0, Math.floor(currentBudget)).toLocaleString();
 
-            // 2. 예산 고갈까지 남은 시간(초)
             const remainingSeconds = currentBudget / EMISSION_PER_SECOND;
             
             if (remainingSeconds <= 0) {
@@ -97,7 +93,6 @@
                 return;
             }
 
-            // 시간 변환 상수들
             const SECONDS_IN_YEAR = 365.25 * 24 * 60 * 60;
             const SECONDS_IN_MONTH = (365.25 / 12) * 24 * 60 * 60;
             const SECONDS_IN_DAY = 24 * 60 * 60;
@@ -121,7 +116,6 @@
             const minutes = Math.floor(rem / SECONDS_IN_MINUTE);
             const seconds = Math.floor(rem % SECONDS_IN_MINUTE);
 
-            // UI에 두 자릿수로 대입
             document.getElementById('cd-yr').innerText = String(years).padStart(2, '0');
             document.getElementById('cd-mo').innerText = String(months).padStart(2, '0');
             document.getElementById('cd-dy').innerText = String(days).padStart(2, '0');
@@ -130,7 +124,6 @@
             document.getElementById('cd-sc').innerText = String(seconds).padStart(2, '0');
         }
 
-        // 실행 및 1초 주기 리프레시
         updateClimateClock();
         setInterval(updateClimateClock, 1000);
     </script>
