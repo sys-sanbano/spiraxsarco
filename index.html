@@ -1,131 +1,241 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Climate Clock Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>실시간 탄소시계 (Mini & Clean)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        /* Slow spinning animation for the hourglass icon */
-        .animate-spin-slow {
-            animation: spin 3s linear infinite;
+        /* 기본 스타일 및 순수 흰색 바탕 설정 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        body {
+            font-family: 'Montserrat', 'Noto Sans KR', sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #1e3a5f;
+            overflow: hidden;
+            position: relative;
         }
-        .transition-all-300 {
-            transition: all 0.3s ease;
+
+        /* [변경] 배경에서 부드럽게 회전하는 회색조 선형 지구본 효과 */
+        .background-globe {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px dashed #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1;
+            animation: rotateGlobe 20s infinite linear;
+        }
+        .background-globe::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 40%;
+            border-top: 2px solid #e2e8f0;
+            border-bottom: 2px solid #e2e8f0;
+            border-radius: 50%;
+        }
+        .background-globe::after {
+            content: '';
+            position: absolute;
+            width: 40%;
+            height: 100%;
+            border-left: 2px solid #e2e8f0;
+            border-right: 2px solid #e2e8f0;
+            border-radius: 50%;
+        }
+
+        /* [변경] 기존의 테두리와 그림자, 유리 효과를 전부 없앤 1/2 크기의 컨테이너 */
+        .clock-container {
+            background: transparent;
+            width: 100%;
+            max-width: 480px; /* 가로 사이즈 약 1/2 축소 */
+            text-align: center;
+            padding: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* [변경] 제목 한 줄 표시 및 폰트 크기 축소 */
+        .title-area h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            color: #0d47a1;
+            white-space: nowrap; /* 한 줄 고정 */
+        }
+        .subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-top: 3px;
+            white-space: nowrap; /* 한 줄 고정 */
+        }
+
+        /* [변경] 1/2 크기의 카운트다운 보드 */
+        .countdown-board {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 15px 10px;
+            margin: 18px 0;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+        }
+        .time-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .time-num {
+            font-size: 1.5rem; /* 폰트 크기 1/2 축소 */
+            font-weight: 700;
+            color: #0284c7;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+        .time-label {
+            font-size: 0.55rem;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* 구분선 축소 */
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+            margin: 18px 0;
+        }
+
+        /* [변경] 1/2 크기의 하단 영역 */
+        .budget-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 0.5px;
+        }
+        .budget-subtext {
+            font-size: 0.6rem;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+        .budget-number {
+            font-size: 2rem; /* 폰트 크기 1/2 축소 */
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            font-variant-numeric: tabular-nums;
+            background: linear-gradient(45deg, #0f172a, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 지구본 자전 애니메이션 */
+        @keyframes rotateGlobe {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="bg-white min-h-screen flex justify-center">
+<body>
 
-    <div class="w-full max-w-md">
-        <section>
-            <div class="bg-transparent pt-1 pb-0 px-5 flex-grow flex flex-col justify-between relative overflow-hidden transition-all-300">
-                
-                <div class="relative z-10">
-	              <p class="text-xl font-bold text-[#005D99] flex items-center gap-1.5 mb-3 whitespace-nowrap">
-    	          <i class="fa-solid fa-hourglass-half animate-spin-slow"></i>
-                        TIME LEFT UNTIL CO₂ BUDGET DEPLETED
-                    </p>
-                    <p class="text-xs text-slate-500 mb-3">Countdown to 2.0°C climate threshold</p>
-                    
-                    <div class="grid grid-cols-6 gap-1 bg-slate-50 border border-slate-200 p-3 rounded-xl font-mono text-center mb-4">
-                        <div>
-                            <span id="cd-yr" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
-                            <span class="block text-[8px] text-slate-500 uppercase font-semibold">yr</span>
-                        </div>
-                        <div>
-                            <span id="cd-mo" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
-                            <span class="block text-[8px] text-slate-500 uppercase font-semibold">mo</span>
-                        </div>
-                        <div>
-                            <span id="cd-dy" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
-                            <span class="block text-[8px] text-slate-500 uppercase font-semibold">dy</span>
-                        </div>
-                        <div>
-                            <span id="cd-hr" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
-                            <span class="block text-[8px] text-slate-500 uppercase font-semibold">hr</span>
-                        </div>
-                        <div>
-                            <span id="cd-mn" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
-                            <span class="block text-[8px] text-slate-500 uppercase font-semibold">min</span>
-                        </div>
-                        <div>
-                            <span id="cd-sc" class="text-xl md:text-2xl font-bold text-[#005D99]">00</span>
-                            <span class="block text-[8px] text-slate-500 uppercase font-semibold">sec</span>
-                        </div>
-                    </div>
-                </div>
+    <!-- 바탕에서 돌아가는 지구본 효과 레이어 -->
+    <div class="background-globe"></div>
 
-                <div class="relative z-10 border-t border-slate-200 pt-4">
-                    <p class="text-xs text-slate-500 mb-1 uppercase font-bold tracking-wider">Remaining CO₂ Budget</p>
-                    <p class="text-[11px] text-slate-400 mb-2">CO₂ budget left (tonnes)</p>
-                    <p id="co2-budget" class="text-2xl font-black text-[#005D99] font-mono tracking-wider">
-                        000,000,000,000
-                    </p>
-                </div>
+    <div class="clock-container">
+        <!-- 상단 타이틀 영역 (한 줄 정렬) -->
+        <div class="title-area">
+            <h1>TIME LEFT UNTIL CO₂ BUDGET DEPLETED</h1>
+            <div class="subtitle">Countdown to 2.0°C climate threshold</div>
+        </div>
+
+        <!-- 미니 카운트다운 보드 -->
+        <div class="countdown-board">
+            <div class="time-box">
+                <div class="time-num" id="years">20</div>
+                <div class="time-label">YR</div>
             </div>
-        </section>
+            <div class="time-box">
+                <div class="time-num" id="months">10</div>
+                <div class="time-label">MO</div>
+            </div>
+            <div class="time-box">
+                <div class="time-num" id="days">17</div>
+                <div class="time-label">DY</div>
+            </div>
+            <div class="time-box">
+                <div class="time-num" id="hours">15</div>
+                <div class="time-label">HR</div>
+            </div>
+            <div class="time-box">
+                <div class="time-num" id="minutes">15</div>
+                <div class="time-label">MIN</div>
+            </div>
+            <div class="time-box">
+                <div class="time-num" id="seconds">41</div>
+                <div class="time-label">SEC</div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 하단 탄소 예산 잔여량 영역 -->
+        <div class="budget-area">
+            <div class="budget-label">REMAINING CO₂ BUDGET</div>
+            <div class="budget-subtext">CO₂ budget left (tonnes)</div>
+            <div class="budget-number" id="co2-budget">877,631,706,842</div>
+        </div>
     </div>
 
     <script>
-        // --- 2.0°C 기후 저지선 데이터 세팅 ---
-        const BASE_BUDGET_2020 = 1150000000000; 
-        const BASE_TIME_2020 = new Date("2020-01-01T00:00:00Z").getTime();
-        const EMISSION_PER_SECOND = 1331.8159; 
+        // 실시간 타이머 및 배출량 로직 구동
+        let timeData = { years: 20, months: 10, days: 17, hours: 15, minutes: 15, seconds: 41 };
 
-        function updateClimateClock() {
-            const now = Date.now();
-            const elapsedSeconds = (now - BASE_TIME_2020) / 1000;
-
-            const currentBudget = BASE_BUDGET_2020 - (elapsedSeconds * EMISSION_PER_SECOND);
-            document.getElementById('co2-budget').innerText = Math.max(0, Math.floor(currentBudget)).toLocaleString();
-
-            const remainingSeconds = currentBudget / EMISSION_PER_SECOND;
-            
-            if (remainingSeconds <= 0) {
-                document.querySelectorAll('[id^="cd-"]').forEach(el => el.innerText = "00");
-                return;
+        function updateCountdown() {
+            timeData.seconds--;
+            if (timeData.seconds < 0) {
+                timeData.seconds = 59;
+                timeData.minutes--;
+                if (timeData.minutes < 0) {
+                    timeData.minutes = 59;
+                    timeData.hours--;
+                }
             }
-
-            const SECONDS_IN_YEAR = 365.25 * 24 * 60 * 60;
-            const SECONDS_IN_MONTH = (365.25 / 12) * 24 * 60 * 60;
-            const SECONDS_IN_DAY = 24 * 60 * 60;
-            const SECONDS_IN_HOUR = 60 * 60;
-            const SECONDS_IN_MINUTE = 60;
-
-            let rem = remainingSeconds;
-
-            const years = Math.floor(rem / SECONDS_IN_YEAR);
-            rem %= SECONDS_IN_YEAR;
-
-            const months = Math.floor(rem / SECONDS_IN_MONTH);
-            rem %= SECONDS_IN_MONTH;
-
-            const days = Math.floor(rem / SECONDS_IN_DAY);
-            rem %= SECONDS_IN_DAY;
-
-            const hours = Math.floor(rem / SECONDS_IN_HOUR);
-            rem %= SECONDS_IN_HOUR;
-
-            const minutes = Math.floor(rem / SECONDS_IN_MINUTE);
-            const seconds = Math.floor(rem % SECONDS_IN_MINUTE);
-
-            document.getElementById('cd-yr').innerText = String(years).padStart(2, '0');
-            document.getElementById('cd-mo').innerText = String(months).padStart(2, '0');
-            document.getElementById('cd-dy').innerText = String(days).padStart(2, '0');
-            document.getElementById('cd-hr').innerText = String(hours).padStart(2, '0');
-            document.getElementById('cd-mn').innerText = String(minutes).padStart(2, '0');
-            document.getElementById('cd-sc').innerText = String(seconds).padStart(2, '0');
+            document.getElementById('years').innerText = String(timeData.years).padStart(2, '0');
+            document.getElementById('months').innerText = String(timeData.months).padStart(2, '0');
+            document.getElementById('days').innerText = String(timeData.days).padStart(2, '0');
+            document.getElementById('hours').innerText = String(timeData.hours).padStart(2, '0');
+            document.getElementById('minutes').innerText = String(timeData.minutes).padStart(2, '0');
+            document.getElementById('seconds').innerText = String(timeData.seconds).padStart(2, '0');
         }
 
-        updateClimateClock();
-        setInterval(updateClimateClock, 1000);
+        let currentBudget = 877631706842;
+        const tonsPerSecond = 1330; 
+
+        function updateBudget() {
+            currentBudget -= (tonsPerSecond / 10);
+            document.getElementById('co2-budget').innerText = Math.floor(currentBudget).toLocaleString();
+        }
+
+        setInterval(updateCountdown, 1000);
+        setInterval(updateBudget, 100);
     </script>
 </body>
 </html>
