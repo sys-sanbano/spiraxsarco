@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>실시간 탄소시계 (Mini & Clean)</title>
+    <title>실시간 탄소시계 (Enhanced Globe)</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
     <style>
         /* 기본 스타일 및 순수 흰색 바탕 설정 */
@@ -24,71 +24,98 @@
             position: relative;
         }
 
-        /* [변경] 배경에서 부드럽게 회전하는 회색조 선형 지구본 효과 */
+        /* [수정] 지구본을 더 잘 보이게 하기 위한 컨테이너 및 애니메이션 */
+        .globe-wrapper {
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 1;
+            /* 실제 지구 자전축과 유사하게 23.5도 기울임 효과 부여 */
+            transform: rotate(23.5deg); 
+        }
+
         .background-globe {
             position: absolute;
-            width: 300px;
-            height: 300px;
-            border: 2px dashed #e2e8f0;
+            width: 100%;
+            height: 100%;
+            /* 테두리 선을 조금 더 두껍고(2px) 진하게(opacity 업) 변경 */
+            border: 2px solid #cbd5e1; 
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            opacity: 0.6;
-            pointer-events: none;
-            z-index: 1;
-            animation: rotateGlobe 20s infinite linear;
+            animation: rotateGlobe 15s infinite linear;
         }
-        .background-globe::before {
-            content: '';
+
+        /* 지구본의 위도선 및 경도선 겹침 효과로 입체감 강화 */
+        .background-globe .lat-1 {
             position: absolute;
             width: 100%;
-            height: 40%;
-            border-top: 2px solid #e2e8f0;
-            border-bottom: 2px solid #e2e8f0;
+            height: 45%;
+            border-top: 2px solid #cbd5e1;
+            border-bottom: 2px solid #cbd5e1;
             border-radius: 50%;
         }
-        .background-globe::after {
-            content: '';
+        .background-globe .lat-2 {
             position: absolute;
-            width: 40%;
+            width: 100%;
+            height: 80%;
+            border-top: 2px dashed #e2e8f0;
+            border-bottom: 2px dashed #e2e8f0;
+            border-radius: 50%;
+        }
+        .background-globe .lng-1 {
+            position: absolute;
+            width: 45%;
             height: 100%;
-            border-left: 2px solid #e2e8f0;
-            border-right: 2px solid #e2e8f0;
+            border-left: 2px solid #cbd5e1;
+            border-right: 2px solid #cbd5e1;
+            border-radius: 50%;
+        }
+        .background-globe .lng-2 {
+            position: absolute;
+            width: 80%;
+            height: 100%;
+            border-left: 2px dashed #e2e8f0;
+            border-right: 2px dashed #e2e8f0;
             border-radius: 50%;
         }
 
-        /* [변경] 기존의 테두리와 그림자, 유리 효과를 전부 없앤 1/2 크기의 컨테이너 */
+        /* 1/2 크기의 메인 콘텐츠 컨테이너 (테두리 및 그림자 없음) */
         .clock-container {
             background: transparent;
             width: 100%;
-            max-width: 480px; /* 가로 사이즈 약 1/2 축소 */
+            max-width: 480px;
             text-align: center;
             padding: 10px;
             position: relative;
             z-index: 2;
         }
 
-        /* [변경] 제목 한 줄 표시 및 폰트 크기 축소 */
+        /* 제목 한 줄 표시 */
         .title-area h1 {
             font-size: 1.15rem;
             font-weight: 800;
             letter-spacing: -0.3px;
             color: #0d47a1;
-            white-space: nowrap; /* 한 줄 고정 */
+            white-space: nowrap;
         }
         .subtitle {
             font-size: 0.75rem;
             color: #64748b;
             font-weight: 600;
             margin-top: 3px;
-            white-space: nowrap; /* 한 줄 고정 */
+            white-space: nowrap;
         }
 
-        /* [변경] 1/2 크기의 카운트다운 보드 */
+        /* 1/2 크기의 카운트다운 보드 */
         .countdown-board {
-            background: #ffffff;
-            border: 1px solid #f1f5f9;
+            background: rgba(255, 255, 255, 0.9); /* 글자가 묻히지 않도록 미세한 보정 */
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
             padding: 15px 10px;
             margin: 18px 0;
@@ -102,7 +129,7 @@
             align-items: center;
         }
         .time-num {
-            font-size: 1.5rem; /* 폰트 크기 1/2 축소 */
+            font-size: 1.5rem;
             font-weight: 700;
             color: #0284c7;
             line-height: 1;
@@ -117,14 +144,14 @@
             letter-spacing: 0.5px;
         }
 
-        /* 구분선 축소 */
+        /* 구분선 */
         .divider {
             height: 1px;
             background: linear-gradient(to right, transparent, #e2e8f0, transparent);
             margin: 18px 0;
         }
 
-        /* [변경] 1/2 크기의 하단 영역 */
+        /* 하단 영역 */
         .budget-label {
             font-size: 0.7rem;
             font-weight: 700;
@@ -137,7 +164,7 @@
             margin-bottom: 6px;
         }
         .budget-number {
-            font-size: 2rem; /* 폰트 크기 1/2 축소 */
+            font-size: 2rem;
             font-weight: 800;
             color: #0f172a;
             letter-spacing: -0.5px;
@@ -156,8 +183,15 @@
 </head>
 <body>
 
-    <!-- 바탕에서 돌아가는 지구본 효과 레이어 -->
-    <div class="background-globe"></div>
+    <!-- [수정] 더 잘 보이도록 강화된 지구본 백그라운드 -->
+    <div class="globe-wrapper">
+        <div class="background-globe">
+            <div class="lat-1"></div>
+            <div class="lat-2"></div>
+            <div class="lng-1"></div>
+            <div class="lng-2"></div>
+        </div>
+    </div>
 
     <div class="clock-container">
         <!-- 상단 타이틀 영역 (한 줄 정렬) -->
