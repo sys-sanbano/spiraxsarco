@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>실시간 탄소시계 (Enhanced Globe)</title>
+    <title>실시간 탄소시계 (Dual Mode)</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
     <style>
         /* 기본 스타일 및 순수 흰색 바탕 설정 */
@@ -24,7 +24,7 @@
             position: relative;
         }
 
-        /* [수정] 지구본을 더 잘 보이게 하기 위한 컨테이너 및 애니메이션 */
+        /* 배경에서 부드럽게 회전하는 선형 지구본 */
         .globe-wrapper {
             position: absolute;
             width: 340px;
@@ -34,15 +34,12 @@
             align-items: center;
             pointer-events: none;
             z-index: 1;
-            /* 실제 지구 자전축과 유사하게 23.5도 기울임 효과 부여 */
             transform: rotate(23.5deg); 
         }
-
         .background-globe {
             position: absolute;
             width: 100%;
             height: 100%;
-            /* 테두리 선을 조금 더 두껍고(2px) 진하게(opacity 업) 변경 */
             border: 2px solid #cbd5e1; 
             border-radius: 50%;
             display: flex;
@@ -50,42 +47,12 @@
             align-items: center;
             animation: rotateGlobe 15s infinite linear;
         }
+        .background-globe .lat-1 { position: absolute; width: 100%; height: 45%; border-top: 2px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; border-radius: 50%; }
+        .background-globe .lat-2 { position: absolute; width: 100%; height: 80%; border-top: 2px dashed #e2e8f0; border-bottom: 2px dashed #e2e8f0; border-radius: 50%; }
+        .background-globe .lng-1 { position: absolute; width: 45%; height: 100%; border-left: 2px solid #cbd5e1; border-right: 2px solid #cbd5e1; border-radius: 50%; }
+        .background-globe .lng-2 { position: absolute; width: 80%; height: 100%; border-left: 2px dashed #e2e8f0; border-right: 2px dashed #e2e8f0; border-radius: 50%; }
 
-        /* 지구본의 위도선 및 경도선 겹침 효과로 입체감 강화 */
-        .background-globe .lat-1 {
-            position: absolute;
-            width: 100%;
-            height: 45%;
-            border-top: 2px solid #cbd5e1;
-            border-bottom: 2px solid #cbd5e1;
-            border-radius: 50%;
-        }
-        .background-globe .lat-2 {
-            position: absolute;
-            width: 100%;
-            height: 80%;
-            border-top: 2px dashed #e2e8f0;
-            border-bottom: 2px dashed #e2e8f0;
-            border-radius: 50%;
-        }
-        .background-globe .lng-1 {
-            position: absolute;
-            width: 45%;
-            height: 100%;
-            border-left: 2px solid #cbd5e1;
-            border-right: 2px solid #cbd5e1;
-            border-radius: 50%;
-        }
-        .background-globe .lng-2 {
-            position: absolute;
-            width: 80%;
-            height: 100%;
-            border-left: 2px dashed #e2e8f0;
-            border-right: 2px dashed #e2e8f0;
-            border-radius: 50%;
-        }
-
-        /* 1/2 크기의 메인 콘텐츠 컨테이너 (테두리 및 그림자 없음) */
+        /* 1/2 크기의 메인 콘텐츠 컨테이너 */
         .clock-container {
             background: transparent;
             width: 100%;
@@ -96,7 +63,7 @@
             z-index: 2;
         }
 
-        /* 제목 한 줄 표시 */
+        /* 제목 영역 */
         .title-area h1 {
             font-size: 1.15rem;
             font-weight: 800;
@@ -112,13 +79,41 @@
             white-space: nowrap;
         }
 
-        /* 1/2 크기의 카운트다운 보드 */
+        /* [추가] 1.5°C / 2.0°C 전환 탭 버튼 스태일 */
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0 5px 0;
+        }
+        .tab-btn {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tab-btn:hover {
+            background: #e2e8f0;
+        }
+        .tab-btn.active {
+            background: #0284c7;
+            color: #ffffff;
+            border-color: #0284c7;
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);
+        }
+
+        /* 카운트다운 보드 */
         .countdown-board {
-            background: rgba(255, 255, 255, 0.9); /* 글자가 묻히지 않도록 미세한 보정 */
+            background: rgba(255, 255, 255, 0.9);
             border: 1px solid #e2e8f0;
             border-radius: 12px;
             padding: 15px 10px;
-            margin: 18px 0;
+            margin: 15px 0;
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             gap: 4px;
@@ -148,10 +143,10 @@
         .divider {
             height: 1px;
             background: linear-gradient(to right, transparent, #e2e8f0, transparent);
-            margin: 18px 0;
+            margin: 15px 0;
         }
 
-        /* 하단 영역 */
+        /* 하단 탄소 예산 영역 */
         .budget-label {
             font-size: 0.7rem;
             font-weight: 700;
@@ -183,7 +178,7 @@
 </head>
 <body>
 
-    <!-- [수정] 더 잘 보이도록 강화된 지구본 백그라운드 -->
+    <!-- 배경 지구본 레이어 -->
     <div class="globe-wrapper">
         <div class="background-globe">
             <div class="lat-1"></div>
@@ -194,43 +189,31 @@
     </div>
 
     <div class="clock-container">
-        <!-- 상단 타이틀 영역 (한 줄 정렬) -->
+        <!-- 상단 타이틀 영역 -->
         <div class="title-area">
             <h1>TIME LEFT UNTIL CO₂ BUDGET DEPLETED</h1>
-            <div class="subtitle">Countdown to 2.0°C climate threshold</div>
+            <div class="subtitle" id="climate-subtitle">Countdown to 2.0°C climate threshold</div>
         </div>
 
-        <!-- 미니 카운트다운 보드 -->
+        <!-- [추가] 두 가지 기준 전환 탭 버튼 -->
+        <div class="tab-container">
+            <button class="tab-btn" onclick="switchMode('1.5')" id="btn-15">1.5°C Scenario</button>
+            <button class="tab-btn active" onclick="switchMode('2.0')" id="btn-20">2.0°C Scenario</button>
+        </div>
+
+        <!-- 카운트다운 보드 -->
         <div class="countdown-board">
-            <div class="time-box">
-                <div class="time-num" id="years">20</div>
-                <div class="time-label">YR</div>
-            </div>
-            <div class="time-box">
-                <div class="time-num" id="months">10</div>
-                <div class="time-label">MO</div>
-            </div>
-            <div class="time-box">
-                <div class="time-num" id="days">17</div>
-                <div class="time-label">DY</div>
-            </div>
-            <div class="time-box">
-                <div class="time-num" id="hours">15</div>
-                <div class="time-label">HR</div>
-            </div>
-            <div class="time-box">
-                <div class="time-num" id="minutes">15</div>
-                <div class="time-label">MIN</div>
-            </div>
-            <div class="time-box">
-                <div class="time-num" id="seconds">41</div>
-                <div class="time-label">SEC</div>
-            </div>
+            <div class="time-box"><div class="time-num" id="years">20</div><div class="time-label">YR</div></div>
+            <div class="time-box"><div class="time-num" id="months">10</div><div class="time-label">MO</div></div>
+            <div class="time-box"><div class="time-num" id="days">17</div><div class="time-label">DY</div></div>
+            <div class="time-box"><div class="time-num" id="hours">15</div><div class="time-label">HR</div></div>
+            <div class="time-box"><div class="time-num" id="minutes">15</div><div class="time-label">MIN</div></div>
+            <div class="time-box"><div class="time-num" id="seconds">41</div><div class="time-label">SEC</div></div>
         </div>
 
         <div class="divider"></div>
 
-        <!-- 하단 탄소 예산 잔여량 영역 -->
+        <!-- 하단 탄소 예산 영역 -->
         <div class="budget-area">
             <div class="budget-label">REMAINING CO₂ BUDGET</div>
             <div class="budget-subtext">CO₂ budget left (tonnes)</div>
@@ -239,37 +222,84 @@
     </div>
 
     <script>
-        // 실시간 타이머 및 배출량 로직 구동
-        let timeData = { years: 20, months: 10, days: 17, hours: 15, minutes: 15, seconds: 41 };
+        // 현재 선택된 모드 관리 ('2.0'이 기본값)
+        let currentMode = '2.0';
 
-        function updateCountdown() {
-            timeData.seconds--;
-            if (timeData.seconds < 0) {
-                timeData.seconds = 59;
-                timeData.minutes--;
-                if (timeData.minutes < 0) {
-                    timeData.minutes = 59;
-                    timeData.hours--;
-                }
+        // 각 모드별 초기 시각 및 탄소량 데이터 세팅 (연구소 통계 비례 반영)
+        const modeData = {
+            '1.5': {
+                time: { years: 5, months: 04, days: 12, hours: 08, minutes: 22, seconds: 14 },
+                budget: 215430890120  // 1.5도 기준 남은 탄소량 예시
+            },
+            '2.0': {
+                time: { years: 20, months: 10, days: 17, hours: 15, minutes: 15, seconds: 41 },
+                budget: 877631706842  // 2.0도 기준 남은 탄소량 (전체 이미지 데이터)
             }
-            document.getElementById('years').innerText = String(timeData.years).padStart(2, '0');
-            document.getElementById('months').innerText = String(timeData.months).padStart(2, '0');
-            document.getElementById('days').innerText = String(timeData.days).padStart(2, '0');
-            document.getElementById('hours').innerText = String(timeData.hours).padStart(2, '0');
-            document.getElementById('minutes').innerText = String(timeData.minutes).padStart(2, '0');
-            document.getElementById('seconds').innerText = String(timeData.seconds).padStart(2, '0');
+        };
+
+        // 탭 클릭 시 데이터 및 스타일 스위칭 함수
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // 버튼 활성화 스타일 교체
+            document.getElementById('btn-15').classList.toggle('active', mode === '1.5');
+            document.getElementById('btn-20').classList.toggle('active', mode === '2.0');
+            
+            // 서브타이틀 교체
+            document.getElementById('climate-subtitle').innerText = `Countdown to ${mode}°C climate threshold`;
+            
+            // 화면 갱신 즉시 실행
+            renderDisplay();
         }
 
-        let currentBudget = 877631706842;
+        // 화면 갱신 함수
+        function renderDisplay() {
+            const activeData = modeData[currentMode];
+            
+            document.getElementById('years').innerText = String(activeData.time.years).padStart(2, '0');
+            document.getElementById('months').innerText = String(activeData.time.months).padStart(2, '0');
+            document.getElementById('days').innerText = String(activeData.time.days).padStart(2, '0');
+            document.getElementById('hours').innerText = String(activeData.time.hours).padStart(2, '0');
+            document.getElementById('minutes').innerText = String(activeData.time.minutes).padStart(2, '0');
+            document.getElementById('seconds').innerText = String(activeData.time.seconds).padStart(2, '0');
+            
+            document.getElementById('co2-budget').innerText = Math.floor(activeData.budget).toLocaleString();
+        }
+
+        // 실시간 카운트다운 타이머 로직 (백그라운드에서 두 모드 동시 감소 연산)
+        function updateTimers() {
+            ['1.5', '2.0'].forEach(mode => {
+                let t = modeData[mode].time;
+                t.seconds--;
+                if (t.seconds < 0) {
+                    t.seconds = 59;
+                    t.minutes--;
+                    if (t.minutes < 0) {
+                        t.minutes = 59;
+                        t.hours--;
+                        // 데모용 간단 일/월 연산은 생략
+                    }
+                }
+            });
+            renderDisplay();
+        }
+
+        // 실시간 탄소 배출량 감소 로직 (전 세계 매초 약 1,330톤 배출 기준)
         const tonsPerSecond = 1330; 
-
-        function updateBudget() {
-            currentBudget -= (tonsPerSecond / 10);
-            document.getElementById('co2-budget').innerText = Math.floor(currentBudget).toLocaleString();
+        function updateBudgets() {
+            ['1.5', '2.0'].forEach(mode => {
+                modeData[mode].budget -= (tonsPerSecond / 10);
+            });
+            // 0.1초마다 현재 선택된 모드의 예산 숫자 갱신
+            document.getElementById('co2-budget').innerText = Math.floor(modeData[currentMode].budget).toLocaleString();
         }
 
-        setInterval(updateCountdown, 1000);
-        setInterval(updateBudget, 100);
+        // 인터벌 시작
+        setInterval(updateTimers, 1000);
+        setInterval(updateBudgets, 100);
+
+        // 최초 1회 화면 렌더링
+        renderDisplay();
     </script>
 </body>
 </html>
